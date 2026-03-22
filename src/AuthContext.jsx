@@ -8,11 +8,44 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState();
   const [location, setLocation] = useState("GATE");
 
-  // TODO: signup
+  async function signup(username) {
+    const response = await fetch(`${API}/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username }),
+    });
 
-  // TODO: authenticate
+    if (!response.ok) {
+      throw new Error("Signup failed");
+    }
 
-  const value = { location };
+    const result = await response.json();
+    setToken(result.token);
+    setLocation("TABLET");
+  }
+
+  async function authenticate() {
+    if (!token) {
+      throw new Error("No token found");
+    }
+
+    const response = await fetch(`${API}/authenticate`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Authentication failed");
+    }
+
+    setLocation("TUNNEL");
+  }
+
+  const value = { location, signup, authenticate };
+
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
